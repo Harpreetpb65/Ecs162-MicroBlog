@@ -1,7 +1,7 @@
 {{! Partial for a single post }}
 <div class="post">
     <div class="post-avatar">
-        <img src="{{#if user.avatar_url}}{{user.avatar_url}}{{else}}/avatar/{{user.username}}{{/if}}" alt="Avatar">
+        <img src="/avatar/{{username}}" alt="Avatar">
     </div>
     <div class="post-content preserve-newlines">
         <h2>{{title}}</h2>
@@ -10,15 +10,48 @@
             <span>Posted by {{username}} on {{timestamp}}</span>
             <div>
                 {{#ifCond user.username username}}
-                    <form action="/delete/{{id}}" method="POST" style="display:inline;">
-                        <button type="submit" class="delete-button"><i class="fas fa-trash-alt"></i> Delete</button>
-                    </form>
+                    <button class="delete-button" data-id="{{id}}" onclick="handleDeleteClick(event)"><i class="fas fa-trash-alt"></i> Delete</button>
                 {{else}}
-                    <form action="/like/{{id}}" method="POST" style="display:inline;">
-                        <button type="submit" class="like-button">♥ Like ({{likes}})</button>
-                    </form>
+                    <button class="like-button" data-id="{{id}}" onclick="handleLikeClick(event)">♥ Like ({{likes}})</button>
                 {{/ifCond}}
             </div>
         </div>        
     </div>
 </div>
+<script>
+    function handleDeleteClick(event) {
+        const buttonElement = event.target.closest('.delete-button');
+        const postId = buttonElement.getAttribute('data-id');        
+        fetch(`/delete/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error deleting post');
+            }
+        });
+    }
+
+    function handleLikeClick(event) {
+        const postId = event.target.getAttribute('data-id');
+        fetch(`/like/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                window.location.reload();
+            } else {
+                alert('Error liking post');
+            }
+        });
+    }
+</script>

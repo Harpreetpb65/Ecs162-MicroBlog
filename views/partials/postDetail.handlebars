@@ -1,6 +1,59 @@
-{{! Use the main layout }}
-{{!< main }}
+{{! Partial for a single post }}
+<div class="post" id="post-{{id}}">
+    <div class="post-avatar">
+        <img src="/avatar/{{username}}" alt="Avatar">
+    </div>
+    <div class="post-content preserve-newlines">
+        <h2>{{title}}</h2>
+        <p>{{content}}</p>
+        <div class="post-status-bar">
+            <span>Posted by {{username}} on {{timestamp}}</span>
+            <div>
+                {{#ifCond user.username username}}
+                    <button class="delete-button" data-id="{{id}}" onclick="handleDeleteClick(event)"><i class="fas fa-trash-alt"></i> Delete</button>
+                {{else}}
+                    <button class="like-button" data-id="{{id}}" onclick="handleLikeClick(event)">♥ Like (<span class="like-count">{{likes}}</span>)</button>
+                {{/ifCond}}
+            </div>
+        </div>        
+    </div>
+</div>
+<script>
+    function handleDeleteClick(event) {
+        const buttonElement = event.target.closest('.delete-button');
+        const postId = buttonElement.getAttribute('data-id');        
+        fetch(`/delete/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.reload();
+            } else {
+                alert('Error deleting post');
+            }
+        });
+    }
 
-<section class="post-detail">
-    {{> post post user=user}}
-</section>
+    function handleLikeClick(event) {
+        const postId = event.target.getAttribute('data-id');
+        fetch(`/like/${postId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const postElement = document.getElementById(`post-${postId}`);
+                const likeCountElement = postElement.querySelector('.like-count');
+                likeCountElement.textContent = data.likes;
+            } else {
+                alert('Error liking post');
+            }
+        });
+    }
+</script>
