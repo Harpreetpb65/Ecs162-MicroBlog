@@ -3,24 +3,31 @@
 
 <div class="profile-container">
     <div class="profile-avatar">
-        <img src="{{#if user.avatar_url}}{{user.avatar_url}}{{else}}/avatar/{{user.username}}{{/if}}" alt="User Avatar" class="profile-avatar-img">
+        <img src="{{#if user.avatar_url}}{{user.avatar_url}}{{else}}/avatar/{{user.username}}{{/if}}" alt="Avatar">
     </div>
+    
     <section class="profile-info">
-        <h2>User Profile</h2>
-        <p>Username: {{user.username}}</p>
+        <h2>{{user.username}}</h2>
         <p>Member since: {{user.memberSince}}</p>
     </section>
 </div>
 
+{{#if deletedPost}}
+    <div class="alert alert-success">
+        <strong>Success!</strong> You deleted the post: "{{deletedPost}}".
+    </div>
+{{/if}}
+
 <section class="user-posts">
-    <h2>Your Posts</h2>
+    <h2>Your {{{postNeoType}}}s</h2>
+    
     {{#if posts.length}}
         <ul>
             {{#each posts}}
-                {{> post this}}
+                {{> post this user=../user}}
             {{/each}}
         </ul>
     {{else}}
-        <p>You have not posted yet.</p>
+        <p>You have not posted yet, poster.</p>
     {{/if}}
 </section>

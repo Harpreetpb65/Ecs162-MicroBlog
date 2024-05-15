@@ -151,14 +151,18 @@ app.post('/like/:id', isAuthenticated, (req, res) => {
     if (post && post.username !== getCurrentUser(req).username) {
         post.likes += 1;
     }
-    res.redirect('/');
+    res.redirect('back');
 });
 
 app.get('/profile', isAuthenticated, (req, res) => {
     const user = getCurrentUser(req);
     const userPosts = posts.filter(post => post.username === user.username);
-    res.render('profile', { user, posts: userPosts });
+    const deletedPost = req.session.deletedPost || null; // Retrieve the deleted post title from the session
+    req.session.deletedPost = null; // Clear the session variable
+    res.render('profile', { user, posts: userPosts, deletedPost });
 });
+
+
 
 app.get('/avatar/:username', (req, res) => {
     const { username } = req.params;
@@ -215,14 +219,20 @@ app.get('/logout', (req, res) => {
     });
 });
 
+// Function to delete a post
 app.post('/delete/:id', isAuthenticated, (req, res) => {
     const postId = parseInt(req.params.id, 10);
     const postIndex = posts.findIndex(post => post.id === postId && post.username === getCurrentUser(req).username);
     if (postIndex !== -1) {
+        const deletedPostTitle = posts[postIndex].title;
         posts.splice(postIndex, 1);
+        req.session.deletedPost = deletedPostTitle; // Store the deleted post title in the session
     }
-    res.redirect('/');
+    res.redirect('/profile');
 });
+
+
+
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
